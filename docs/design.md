@@ -136,8 +136,8 @@ bad client input.
 ```text
 ① size guard          Content-Length > 64 KiB ⇒ 413 (checked before reading body)
 ② resolve widget      unknown ⇒ 404
-③ origin check        server-side re-check vs widget.allowed_origins ⇒ 403 disallowed_origin
-                      (CORSMiddleware handles browser-visible behavior; curl sends no Origin)
+③ origin check        Origin header REQUIRED: missing or not in widget.allowed_origins
+                      ⇒ 403 disallowed_origin (curl included — fail closed)
 ④ schema validation   fields vs widget.fields definition ⇒ 400 {field_errors}
 ⑤ honeypot            filled ⇒ silent fake-success 202, logged spam_honeypot, nothing stored
 ⑥ rate limits         per-(ip,widget) tier then global per-widget tier ⇒ 429 + Retry-After

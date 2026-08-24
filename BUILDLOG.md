@@ -37,3 +37,32 @@ Design rationale and full decision records will live in `docs/design.md`
 - Dev-environment quirk (not code): commands passed through wsl.exe mangle
   embedded quotes, which briefly produced a commit titled "Add" in Phase 0
   (amended). Commit messages now go via `-F <file>`.
+
+## 2026-08-24 — Phase 3: public pipeline + background jobs
+
+- Code written with AI assistance; reviewed before committing. Catches worth
+  recording:
+  1. The AI generated `class SubmissionOutcomeType(Literal[...])` — invalid
+     Python (`Cannot subclass typing.Literal`). Caught by an import smoke
+     check; the alias was deleted rather than worked around.
+  2. First full test run: **33 passed / 8 failed**. Three distinct causes,
+     all fixed and understood rather than patched over:
+     - missing `update` import in `job_repo.mark_retry` (NameError) —
+       caught only because a test exercised the failure path;
+     - missing `timedelta` import in a test file;
+     - `ASGITransport` never runs FastAPI lifespan, so `app.state.geo_chain`
+       was absent in tests — tests now seed a null chain explicitly instead
+       of papering over it in app code.
+  3. Live gate initially hit a **stale uvicorn from an earlier session**
+     still holding port 8000 with pre-Phase-3 code → confusing 404s that no
+     amount of code-reading explained; `ss -ltnp` found the zombie.
+- Honest scope notes:
+  - Replay requests consume rate-limit budget (limiter runs before the
+    replay short-circuit). Accepted trade-off: keeps the limiter's counter
+    write unconditional and simple; documented here rather than hidden.
+  - The gate's "burst" line shows `201 201 201 429 …` because earlier gate
+    probes had already used part of the window — the cap is absolute per
+    window, which is exactly the designed behavior.
+- Gate passed end-to-end on first clean run after the stale-server kill:
+  201/replay/403/400/202/429, real enrichment (Ashburn, Virginia via
+  ip-api.com), outbox jobs processed to `done` by the worker.

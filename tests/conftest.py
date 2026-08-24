@@ -44,12 +44,55 @@ async def clean_tables(migrated_database):
     from app.core.db import engine
 
     async with engine.begin() as conn:
-        await conn.execute(text("TRUNCATE widgets, users CASCADE"))
+        await conn.execute(
+            text(
+                "TRUNCATE submissions, jobs, rate_limits, widgets, users CASCADE"
+            )
+        )
+
+
+@pytest.fixture(autouse=True)
+def _clean_dependency_overrides():
+    yield
+    from app.main import app
+
+    app.dependency_overrides.clear()
+
+
+def override_geo_chain(result):
+    from uuid import UUID as _UUID
+
+    class FakeChain:
+        def __init__(self):
+            self.calls = []
+
+        async def enrich(self, ip):
+            self.calls.append(ip)
+            return result
+
+        async def aclose(self):
+            return None
+
+    from app.api.public.deps import get_geo_chain
+    from app.main import app
+
+    fake = FakeChain()
+    app.dependency_overrides[get_geo_chain] = lambda: fake
+    return fake
 
 
 @pytest.fixture
 async def client():
     from app.main import app
+
+    class NullGeoChain:
+        async def enrich(self, ip):
+            return None
+
+        async def aclose(self):
+            return None
+
+    app.state.geo_chain = NullGeoChain()
 
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://testserver") as c:
@@ -81,3 +124,35 @@ async def create_widget(client, headers, **overrides):
     response = await client.post("/api/v1/widgets", json=payload, headers=headers)
     assert response.status_code == 201, response.text
     return response.json()
+
+
+async def post_submission(
+    client,
+    widget_id,
+    *,
+    fields=None,
+    origin="http://localhost:5500",
+    idempotency_key=None,
+    honeypot="",
+):
+    body = {
+        "widget_id": widget_id,
+        "fields": fields if fields is not None else {"email": "visitor@example.com"},
+        "website": honeypot,
+    }
+    if idempotency_key:
+        body["idempotency_key"] = idempotency_key
+    headers = {"Origin": origin} if origin else {}
+    return await client.post(
+        "/api/v1/public/submissions", json=body, headers=headers
+    )
+
+
+async def fetch_all(sql):
+    from sqlalchemy import text
+
+    from app.core.db import session_factory
+
+    async with session_factory() as session:
+        result = await session.execute(text(sql))
+        return result.fetchall()
