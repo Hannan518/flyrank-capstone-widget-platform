@@ -6,7 +6,21 @@ done, so nothing here is written ahead of its proof.
 
 ## Toolchain (Phase 0)
 
-(pending — compose health + `/health` transcript)
+`docker compose up -d` — Postgres 16 reaches `healthy`, port mapped:
+
+```text
+CONTAINER ID   IMAGE               COMMAND                  CREATED         STATUS                    PORTS                                         NAMES
+907baffc00d8   postgres:16-alpine  "docker-entrypoint.s…"   8 seconds ago   Up 6 seconds (healthy)    0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp   widget-platform-db
+```
+
+App booted against the containerized DB; `GET /health` pings the database with `SELECT 1`:
+
+```text
+GATE-RESULT: HTTP-200 {"status":"ok","database":"ok"}
+```
+
+A DB outage degrades honestly instead of lying (handler returns 503
+`{"status":"degraded","database":"unavailable"}` on connection failure).
 
 ## Widget management
 
