@@ -10,8 +10,8 @@ provider fallback → stored idempotently → surfaced in an owner dashboard.
 Email/webhook side effects run as background jobs that can fail without ever
 breaking the main path.
 
-> **Status:** in development (Phase 0 — scaffold). Design doc lands in Phase 1
-> at `docs/design.md`.
+> **Status:** in development (Phase 1 — design). Architecture and locked
+> decisions live in [docs/design.md](docs/design.md).
 
 ## Architecture (planned)
 
