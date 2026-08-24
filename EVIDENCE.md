@@ -24,7 +24,27 @@ A DB outage degrades honestly instead of lying (handler returns 503
 
 ## Widget management
 
-(pending)
+Automated suite run (Phase 2): `pytest -q`
+
+```text
+.................                                                        [100%]
+17 passed in 25.99s
+```
+
+- **Authenticated CRUD; requests without valid auth are rejected** —
+  `test_widget_endpoints_reject_missing_token` (create + list → 401),
+  `test_login_wrong_password_401`, `test_login_unknown_user_401_generic_message`.
+- **Multi-tenant isolation proven: tenant A cannot read or modify tenant B's
+  widgets** — `test_widget_list_scoped_to_owner` (each owner sees only their
+  own), `test_foreign_widget_get_is_404_not_403`,
+  `test_foreign_widget_patch_is_404`, `test_foreign_widget_delete_is_404`
+  (foreign delete → 404 and the row survives for its real owner).
+- **Embed snippet generated per widget** — `test_create_widget_returns_embed_snippet`
+  asserts `<script src="…/widget.v1.js?id={id}"></script>` shape.
+- Honest codes: unknown-field payloads → 400 via normalized validation errors
+  (`test_create_rejects_unknown_fields_400`, `test_create_rejects_invalid_origin_400`);
+  foreign resources answer **404** (never 403) so cross-tenant existence is
+  not leaked.
 
 ## Widget delivery
 

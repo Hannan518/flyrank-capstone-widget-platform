@@ -26,7 +26,8 @@ acceptance probes passing.
 ## 2 · Data model & indexes
 
 ```text
-users(id uuid pk · email citext unique not null · password_hash not null · created_at)
+users(id uuid pk · email varchar(320) lowercase-unique not null · password_hash not null · created_at)
+        emails normalized to lowercase at the service layer (no citext dependency)
 
 widgets(id uuid pk
         · owner_id → users.id not null          -- tenant boundary, in EVERY query
