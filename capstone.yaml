@@ -1,0 +1,13 @@
+# Evaluator manifest — completed by submission time.
+capstone: embeddable-widget-lead-capture-platform
+language: python
+
+run: docker compose up --build
+seed: TODO(phase-4)
+test: pytest
+
+base_url: http://localhost:8000
+
+endpoints:
+  admin: []
+  public: []
