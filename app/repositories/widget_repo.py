@@ -10,6 +10,11 @@ async def create(session: AsyncSession, widget: Widget) -> Widget:
     return widget
 
 
+async def get_by_id(session: AsyncSession, widget_id: str) -> Widget | None:
+    result = await session.execute(select(Widget).where(Widget.id == widget_id))
+    return result.scalar_one_or_none()
+
+
 async def get_for_owner(
     session: AsyncSession, widget_id: str, owner_id: str
 ) -> Widget | None:
