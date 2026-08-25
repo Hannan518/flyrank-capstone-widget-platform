@@ -72,6 +72,27 @@ for _ in 1 2 3 4 5 6; do
 done
 echo
 
+echo "== public config endpoint =="
+curl -s -D - -o /tmp/gate_config.json "$BASE/api/v1/public/widgets/$WID/config" \
+  -H 'Origin: http://localhost:5500'
+grep -iE '^(cache-control|vary|access-control-allow-origin)' /dev/null 2>/dev/null || true
+head -c 300 /tmp/gate_config.json; echo
+
+echo "== embed script delivery =="
+curl -s -o /dev/null -w 'versioned: %{http_code} %{content_type}\n' \
+  "$BASE/widget.v1.js?id=$WID"
+curl -s -D - -o /dev/null "$BASE/widget.v1.js?id=$WID" | grep -i '^cache-control'
+curl -s -o /dev/null -w 'alias:     %{http_code} %{content_type}\n' \
+  "$BASE/widget.js?id=$WID"
+
+echo "== dashboard: submissions =="
+curl -s "$BASE/api/v1/dashboard/submissions?widget_id=$WID&limit=3" \
+  -H "Authorization: Bearer $TOKEN" | head -c 500
+echo
+
+echo "== dashboard: stats =="
+curl -s "$BASE/api/v1/dashboard/stats?days=30" -H "Authorization: Bearer $TOKEN"
+
 sleep 1
 echo "== stored rows (geo enrichment proof) =="
 docker exec widget-platform-db psql -U widget -d widget_platform \

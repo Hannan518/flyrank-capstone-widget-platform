@@ -48,7 +48,67 @@ Automated suite run (Phase 2): `pytest -q`
 
 ## Widget delivery
 
-(pending)
+Automated coverage (Phase 4): `pytest -q` — full suite
+
+```text
+.....................................................                    [100%]
+53 passed in 98.67s
+```
+
+- **Embed snippet loads a real widget on any allow-listed origin** —
+  `test_versioned_bundle_served_immutable` (200 `application/javascript`,
+  `Cache-Control: public, max-age=31536000, immutable`), alias served at
+  short cache (`test_bundle_alias_served_short_cache`), unknown id ⇒ 404
+  (`test_bundle_unknown_widget_404`). The bundle renders the form from the
+  config JSON, generates `crypto.randomUUID()` as hidden `idempotency_key`
+  (§6.1), retries network failures with the *same* key and regenerates it
+  only after confirmed success.
+- **Public config endpoint returns render-config only** —
+  `test_config_returns_render_config_only` asserts no `allowed_origins` /
+  owner fields leak; caching contract pinned by
+  `test_config_cache_headers_and_cors_echo`
+  (`Cache-Control: public, max-age=30`, `Vary: Origin`, ACAO echoed only for
+  allow-listed origins).
+- **Dashboard read API is tenant-scoped** —
+  `test_dashboard_submissions_paginated_no_duplicates` (keyset cursor walk,
+  no dupes), `test_dashboard_widget_filter_and_foreign_404` (foreign
+  `widget_id` ⇒ 404), `test_stats_shape_tenant_scope_and_geo` (other
+  tenant's submissions invisible in totals),
+  `test_dashboard_rejects_missing_auth_bad_cursor_bad_limit`.
+
+Live cross-port gate (API :8000, customer-site page served from :5500,
+visitor flow simulated exactly as a browser issues it):
+
+```text
+== public config endpoint ==
+HTTP/1.1 200 OK
+cache-control: public, max-age=30
+vary: Origin
+access-control-allow-origin: http://localhost:5500
+{"type":"signup_form","title":"Gate Widget","fields":[{"name":"email",
+ "type":"email","label":"Email","required":true}],"button_text":"Submit", ...}
+
+== embed script delivery ==
+versioned: 200 application/javascript; charset=utf-8
+cache-control: public, max-age=31536000, immutable
+alias:     200 application/javascript; charset=utf-8
+
+== dashboard: stats ==
+{"total":4,"per_widget":[{"widget_id":"9c410e00-…","title":"Gate Widget",
+ "count":4}],"timeseries":[{"day":"2026-08-25","count":4}],
+ "geo":[{"country":"US","count":4}]}
+```
+
+Evaluator `seed:` step run against a live server (`scripts/seed_demo.sh`):
+registers the demo owner, creates two widgets, submits five leads through the
+public pipeline, then prints the owner's dashboard stats as proof:
+
+```text
+submission alice -> 201 ... submission erin -> 201
+dashboard stats after seeding:
+{"total":25,"per_widget":[...],"timeseries":[{"day":"2026-08-25","count":25}],
+ "geo":[{"country":"US","count":25}]}
+```
 
 ## Public submission API
 

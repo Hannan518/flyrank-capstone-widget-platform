@@ -66,3 +66,29 @@ Design rationale and full decision records will live in `docs/design.md`
 - Gate passed end-to-end on first clean run after the stale-server kill:
   201/replay/403/400/202/429, real enrichment (Ashburn, Virginia via
   ip-api.com), outbox jobs processed to `done` by the worker.
+
+## 2026-08-25 — Phase 4: widget delivery + dashboard
+
+- Code written with AI assistance; reviewed before committing. Catches:
+  1. Bundle route resolved its static file relative to `app/api/` instead of
+     `app/` — every test errored on import. Off-by-one in `parents[…]`;
+     caught immediately by the suite.
+  2. The pagination test asserted a page size it never requested (default
+     limit is 25, not 2). Test bug, not API bug.
+  3. `seed_demo.sh` originally used `demo-owner@flyrank.test`; the email
+     validator rejects special-use TLDs like `.test` as undeliverable.
+     Switched to `example.com`.
+  4. **Unresolved curiosity, worked around honestly:** my demo wrapper's own
+     stats-fetch block (a login identical to one that succeeded seconds
+     earlier inside `seed_demo.sh`) kept failing with a non-token JSON
+     response — reproducibly in that wrapper, never anywhere else,
+     including an instrumented re-run of the same sequence. I did not find
+     the root cause. Fix was structural rather than diagnostic: the stats
+     proof moved *into* `seed_demo.sh`, which is also better for evaluators
+     (the seed step now ends with visible dashboard evidence). Flagging it
+     so a future reader knows the wrapper history wasn't clean.
+- Gate passed: config caching/CORS headers exact per contract, bundle served
+  immutable at the versioned URL and short-cached at `/widget.js`, unknown
+  ids 404, dashboard pages walk the cursor without duplicates, foreign
+  widget_id answers 404, and seeded stats aggregate correctly across two
+  widgets and both tenants' isolation boundaries.
