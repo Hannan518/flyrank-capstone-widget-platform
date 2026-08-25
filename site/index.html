@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Acme Blog — customer test site</title>
+  <style>
+    body { font-family: Georgia, serif; max-width: 680px; margin: 40px auto; padding: 0 16px; color: #222; }
+    h1 { font-size: 28px; } .meta { color: #777; font-size: 14px; }
+    #widget-slot { margin: 24px 0; padding: 12px; border: 1px dashed #bbb; }
+  </style>
+</head>
+<body>
+  <h1>Why quarterly planning is dead</h1>
+  <p class="meta">Acme Blog · demo post</p>
+  <p>
+    Long-form content lives here. Scroll to the end of the post — that is where
+    the newsletter widget is embedded, exactly like a real customer would.
+  </p>
+  <p>
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a diam
+    lectus. Sed sit amet ipsum mauris. Maecenas malesuada quam quis neque.
+  </p>
+
+  <div id="widget-slot">
+    <!-- The embed snippet is injected below by the helper script from ?widget=<id>. -->
+  </div>
+
+  <script>
+    // Demo convenience: /site/?widget=<uuid> installs the real embed snippet.
+    (function () {
+      var id = new URLSearchParams(location.search).get("widget");
+      var slot = document.getElementById("widget-slot");
+      if (!id) {
+        slot.innerHTML =
+          "<em>Add <code>?widget=&lt;widget-id&gt;</code> to the URL to install " +
+          "the embed snippet here.</em>";
+        return;
+      }
+      var s = document.createElement("script");
+      s.src = "http://localhost:8000/widget.v1.js?id=" + encodeURIComponent(id);
+      slot.parentNode.insertBefore(s, slot.nextSibling);
+    })();
+  </script>
+</body>
+</html>

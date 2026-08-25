@@ -7,7 +7,10 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import text
 
 from app.api.admin.auth import router as auth_router
+from app.api.admin.dashboard import router as dashboard_router
 from app.api.admin.widgets import router as widgets_router
+from app.api.public.bundle import router as bundle_router
+from app.api.public.config import router as config_router
 from app.api.public.submissions import router as public_router
 from app.core.config import get_settings
 from app.core.db import session_factory
@@ -68,7 +71,10 @@ install_error_handlers(app)
 
 app.include_router(auth_router, prefix="/api/v1")
 app.include_router(widgets_router, prefix="/api/v1")
+app.include_router(dashboard_router, prefix="/api/v1")
 app.include_router(public_router, prefix="/api/v1")
+app.include_router(config_router, prefix="/api/v1")
+app.include_router(bundle_router)
 
 
 @app.get("/health")

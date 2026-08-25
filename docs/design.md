@@ -121,7 +121,7 @@ limiter.
 | POST `/api/v1/widgets` | JWT | 201 widget incl. `embed_snippet` | 400 · 401 |
 | GET `/api/v1/widgets` | JWT | 200 list (scoped to caller) | 401 |
 | GET/PATCH/DELETE `/api/v1/widgets/{id}` | JWT | 200 · 204 | 400 · 401 · **404 foreign** |
-| GET `/api/v1/dashboard/submissions` | JWT | 200 cursor page (`widget_id`, `limit`) | 400 · 401 |
+| GET `/api/v1/dashboard/submissions` | JWT | 200 cursor page (`widget_id`, `limit`) | 400 · 401 · **404 foreign widget_id** |
 | GET `/api/v1/dashboard/stats?days=30` | JWT | `{total, per_widget[], timeseries[], geo[]}` | 401 |
 | GET `/widget.v{n}.js?id=` | public | 200 JS | 404 unknown widget |
 | GET `/api/v1/public/widgets/{id}/config` | public | 200 render-config only (no owner data) | 404 |
