@@ -16,5 +16,22 @@ services:
       timeout: 3s
       retries: 20
 
+  api:
+    build: .
+    container_name: widget-platform-api
+    environment:
+      APP_ENV: dev
+      DATABASE_URL: postgresql+asyncpg://widget:widget@db:5432/widget_platform
+      JWT_SECRET: dev-only-secret-change-me-0123456789abcdef!!
+      PUBLIC_BASE_URL: http://localhost:8000
+      GEO_PROVIDER_MODE: live
+      DEV_PUBLIC_IP: "8.8.8.8"
+      EMAIL_MODE: console
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   db_data:
