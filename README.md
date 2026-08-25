@@ -10,7 +10,8 @@ provider fallback → stored idempotently → surfaced in an owner dashboard.
 Email/webhook side effects run as background jobs that can fail without ever
 breaking the main path.
 
-> **Status:** in development (Phase 1 — design). Architecture and locked
+> **Status:** in development — Phases 0–3 done (design · foundation · auth +
+> widget CRUD · public pipeline + background jobs). Architecture and locked
 > decisions live in [docs/design.md](docs/design.md).
 
 ## Architecture (planned)
@@ -43,7 +44,7 @@ JWT auth · httpx · pytest
 
 ## Quickstart
 
-Coming online in Phase 2. The finished project will run with one command:
+Coming online in a later phase. The finished project will run with one command:
 
 ```bash
 docker compose up

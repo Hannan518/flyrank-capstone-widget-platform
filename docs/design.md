@@ -1,6 +1,6 @@
 # Design Doc — Embeddable Widget & Lead-Capture Platform
 
-FlyRank Backend Track capstone · Phase 1 deliverable · status: **awaiting owner sign-off**
+FlyRank Backend Track capstone · Phase 1 deliverable · status: **signed off** (2026-08-24)
 
 ---
 
@@ -239,9 +239,9 @@ api/admin/*.py · api/public/*.py     HTTP ↔ Pydantic schemas ONLY (parse/resp
 services/*.py                        business logic · transaction boundaries
         │
 repos/*.py                           SQL only · tenant_id in EVERY query
-providers/                           GeoProvider + Mailer Protocols; DI via Depends
+services/geo/ · services/mailers.py   GeoProvider/Mailer Protocols; DI via Depends
 core/                                config(.env) · security(JWT/bcrypt) · errors · CORS
-jobs/                                worker.py · pruner.py · handlers.py
+jobs/outbox_worker.py                OutboxWorker · Pruner (both lifespan-managed)
 alembic/                             migrations
 tests/                               mapped 1:1 to DoD boxes + six probes
 site/index.html                      customer-site test page (second local port)
