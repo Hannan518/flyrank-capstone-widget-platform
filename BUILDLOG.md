@@ -92,3 +92,19 @@ Design rationale and full decision records will live in `docs/design.md`
   ids 404, dashboard pages walk the cursor without duplicates, foreign
   widget_id answers 404, and seeded stats aggregate correctly across two
   widgets and both tenants' isolation boundaries.
+
+## 2026-08-25 — Phase 5: packaging + final sweep
+
+- The `run:` contract exposed a real gap: `docker compose up --build` booted
+  only Postgres — no Dockerfile existed. Added one (non-root user, migrations
+  before serve via `alembic upgrade head && exec uvicorn`) and an `api`
+  compose service.
+- **Dependency catch that would have shipped broken:** `httpx` was listed
+  only in `requirements-dev.txt`, yet the geo chain imports it at runtime.
+  Local dev masked it (dev install includes `-r requirements.txt` plus the
+  dev extras). The container build caught the class of problem; moved httpx
+  to runtime requirements.
+- Clean-room rehearsal run before final commit: `down -v`, `up --build`,
+  health green, seed green — the evaluator path is now proven, not assumed.
+- README Quickstart replaced with the commands above; EVIDENCE "Tests &
+  documentation" section closed out.

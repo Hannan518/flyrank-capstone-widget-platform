@@ -195,4 +195,36 @@ Subject: Thanks for signing up via Gate Widget | Body: Your submission was recei
 
 ## Tests & documentation
 
-(pending)
+Final suite state (`pytest -q`, local run against a throwaway test database):
+
+```text
+.....................................................                    [100%]
+53 passed
+```
+
+- **Test suite covers all DoD boxes** — mapped per section above: auth/tenant
+  isolation (Widget management), config/bundle/dashboard (Widget delivery),
+  pipeline + idempotency (Public submission API), limiter tiers + honeypot
+  (Abuse protection), provider fallback chain + outbox worker/pruner
+  (Enrichment & safe side effects). Tests use their own `widget_platform_test`
+  database, recreated via Alembic per session, truncated per test.
+- **`run:` contract honored** — clean-room rehearsal: volume wiped, then
+  `docker compose up --build` builds the API image, applies migrations inside
+  the container before serving, reaches healthy:
+
+  ```text
+  widget-platform-api | Up 6 seconds
+  widget-platform-db  | Up 14 seconds (healthy)
+  {"status":"ok","database":"ok"}
+  ```
+
+  followed by the documented `seed:` step against that fresh stack
+  (`scripts/seed_demo.sh`): five submissions through the public pipeline,
+  dashboard stats printed as proof (total 5 · geo US×5 · 3+2 across widgets).
+- **Documentation inventory** — [`docs/design.md`](docs/design.md) (signed
+  off; layer sketch verified against the tree), this evidence file (one paste
+  per DoD box), [`BUILDLOG.md`](BUILDLOG.md) (honest AI log including wrong
+  turns), [README](README.md) Quickstart with working commands,
+  [`capstone.yaml`](capstone.yaml) with concrete endpoint list, `.env.example`
+  mirroring every setting.
+
