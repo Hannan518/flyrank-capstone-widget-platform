@@ -108,3 +108,8 @@ Design rationale and full decision records will live in `docs/design.md`
   health green, seed green — the evaluator path is now proven, not assumed.
 - README Quickstart replaced with the commands above; EVIDENCE "Tests &
   documentation" section closed out.
+- Review feedback caught an undocumented judgment call: `/config` fails open
+  on disallowed origins (CORS gates browser JS only), while `/submissions`
+  fails closed with 403. Deliberate — config data is non-sensitive,
+  submission is a write — but it lived only in a test assertion until now;
+  stated explicitly in §9 of the design doc.

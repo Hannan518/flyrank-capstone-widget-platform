@@ -272,6 +272,10 @@ Carried limitations (also surfaced in README):
   `.env.example` documents every variable.
 - bcrypt password hashing; JWT HS256 with startup-time secret length check.
 - CORS fail-closed: empty `allowed_origins` ⇒ no cross-origin access.
+- Origin asymmetry (deliberate): `/config` is intentionally origin-open —
+  CORS gates browser JS access only, not the response itself — because config
+  data (field names, button text) is non-sensitive; `/submissions` is
+  origin-gated with 403 because submission is a write with real consequences.
 - Every query tenant-scoped at the repo layer, not the router layer.
 - Raw SQL only where it buys atomicity (limiter upsert, job claim); everything
   else through SQLAlchemy Core/ORM constructs — no string interpolation.

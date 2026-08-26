@@ -10,11 +10,13 @@ provider fallback → stored idempotently → surfaced in an owner dashboard.
 Email/webhook side effects run as background jobs that can fail without ever
 breaking the main path.
 
-> **Status:** in development — Phases 0–3 done (design · foundation · auth +
-> widget CRUD · public pipeline + background jobs). Architecture and locked
-> decisions live in [docs/design.md](docs/design.md).
+> **Status:** complete — all phases done (design · auth + multi-tenant
+> widgets · hardened public pipeline · background jobs · embeddable bundle +
+> dashboard). Architecture and locked decisions live in
+> [docs/design.md](docs/design.md); proof per requirement in
+> [EVIDENCE.md](EVIDENCE.md).
 
-## Architecture (planned)
+## Architecture
 
 ```text
 Widget Owner (authenticated)
