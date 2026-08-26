@@ -159,8 +159,21 @@ per-(ip,widget) window; the cap held and 429 carries `Retry-After`)
   (5 allowed, 6th blocked with bounded Retry-After),
   `test_limits_are_scoped_per_widget_and_ip` (other widget / other ip
   unaffected), `test_prune_removes_only_expired_rows`.
-- **Honeypot silently rejects** — `test_honeypot_returns_fake_success_and_
-  stores_nothing` (202 fake success, zero rows).
+- **Honeypot silently rejects** — `test_honeypot_returns_fake_success_and_`
+  `stores_nothing` (202 fake success, zero rows).
+- **Auth brute-force blunted** — per-IP fixed window shared across register
+  + login via the same Postgres rate-limit machinery. Gate proof:
+
+  ```text
+  == auth rate limiter (burst test) ==
+  6 rapid login attempts from same IP:  401 401 401 401 401 429
+  Expected: five 401s then one 429
+  ```
+
+  `test_auth_burst_returns_429_with_retry_after`,
+  `test_register_and_login_share_one_bucket_per_ip`,
+  `test_legitimate_login_succeeds_after_window_reset` (row deletion simulates window expiry),
+  `test_correct_credentials_within_limit_return_200`.
 
 ## Enrichment & safe side effects
 
@@ -198,8 +211,8 @@ Subject: Thanks for signing up via Gate Widget | Body: Your submission was recei
 Final suite state (`pytest -q`, local run against a throwaway test database):
 
 ```text
-.....................................................                    [100%]
-53 passed
+......................................................................        [100%]
+57 passed
 ```
 
 - **Test suite covers all DoD boxes** — mapped per section above: auth/tenant

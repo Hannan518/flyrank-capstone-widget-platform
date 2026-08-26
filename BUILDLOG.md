@@ -113,3 +113,16 @@ Design rationale and full decision records will live in `docs/design.md`
   fails closed with 403. Deliberate — config data is non-sensitive,
   submission is a write — but it lived only in a test assertion until now;
   stated explicitly in §9 of the design doc.
+- **Review-driven hardening — auth rate limiter.** Design doc §4 claimed a
+  shared per-IP limit on register/login but the code had no enforcement.
+  Added `enforce_auth_limits()` (same Postgres fixed-window machinery as
+  submissions), `RateLimitedError` typed exception with `Retry-After` header,
+  wired into both `/auth/register` and `/auth/login` routes. Four new tests
+  added including window-reset recovery (explicit `DELETE FROM rate_limits`
+  simulates elapsed time). Gate script extended with auth-burst probe.
+  `get_client_ip` dependency promoted from `public/deps.py` to the shared
+  `app/api/deps.py` (pragmatic cross-layer import eliminated).
+- **EMAIL_MODE tightened to console-only.** `Settings` validator now rejects
+  any value other than `"console"` with a clear startup error message,
+  replacing the previous `in ("console", "smtp")` check. Design doc §8
+  limitations updated to document the deliberate exclusion.

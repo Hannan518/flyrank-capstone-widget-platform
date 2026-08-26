@@ -265,6 +265,11 @@ Carried limitations (also surfaced in README):
 - Fixed-window rate limiting permits ≤2× burst across window boundaries.
 - Tenancy model is user-as-tenant; a `tenants` table + membership is the
   growth path if org-level tenancy is ever needed.
+- SMTP email delivery is deliberately excluded — `EMAIL_MODE` must be `console`
+  (validated at startup). The `confirmation_email` outbox handler proves the
+  async pattern; real SMTP can be swapped in without changing the pipeline.
+- `webhook` is declared in the job-type enum but has no handler; delivering
+  outbound webhooks is left as a future extension.
 
 ## 9 · Security notes
 

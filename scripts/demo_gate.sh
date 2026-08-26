@@ -92,6 +92,18 @@ echo
 
 echo "== dashboard: stats =="
 curl -s "$BASE/api/v1/dashboard/stats?days=30" -H "Authorization: Bearer $TOKEN"
+echo
+
+echo "== auth rate limiter (burst test) =="
+AUTH_CODES=""
+for i in 1 2 3 4 5 6; do
+  CODE=$(curl -s -o /dev/null -w '%{http_code}' "$BASE/api/v1/auth/login" \
+    -H 'Content-Type: application/json' \
+    -d "{\"email\": \"burst${i}@gate.test\", \"password\": \"x\"}")
+  AUTH_CODES="$AUTH_CODES $CODE"
+done
+echo "6 rapid login attempts from same IP: $AUTH_CODES"
+echo "Expected: five 401s then one 429"
 
 sleep 1
 echo "== stored rows (geo enrichment proof) =="
