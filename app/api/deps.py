@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -10,6 +10,13 @@ from app.core.security import decode_access_token
 bearer_scheme = HTTPBearer(auto_error=False)
 
 SessionDep = Annotated[AsyncSession, Depends(get_session)]
+
+
+def get_client_ip(request: Request) -> str:
+    return request.client.host if request.client else "0.0.0.0"
+
+
+ClientIpDep = Annotated[str, Depends(get_client_ip)]
 
 
 async def get_current_user_id(

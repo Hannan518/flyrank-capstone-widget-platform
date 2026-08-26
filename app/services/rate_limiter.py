@@ -5,7 +5,22 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
+from app.core.errors import AppError
 from app.repositories import rate_limit_repo
+
+
+class RateLimitedError(AppError):
+    status_code = 429
+    detail = "too many requests"
+
+    def __init__(self, retry_after_seconds: int):
+        super().__init__(
+            headers={
+                "Retry-After": str(retry_after_seconds),
+                "Vary": "Origin",
+            }
+        )
+        self.retry_after_seconds = retry_after_seconds
 
 
 @dataclass(frozen=True)
@@ -41,6 +56,18 @@ async def enforce_submission_limits(
     if widget_count > settings.rate_limit_widget_max:
         return _blocked(now, widget_window, settings.rate_limit_widget_window_seconds)
 
+    return RateVerdict(allowed=True)
+
+
+async def enforce_auth_limits(session: AsyncSession, ip: str) -> RateVerdict:
+    """Shared per-IP bucket across register + login (brute-force blunting)."""
+    settings = get_settings()
+    now = datetime.now(timezone.utc)
+    window = window_start(now, settings.rate_limit_auth_window_seconds)
+    scope = scope_hash(f"auth|{ip}")
+    count = await rate_limit_repo.increment(session, scope, window)
+    if count > settings.rate_limit_auth_max:
+        return _blocked(now, window, settings.rate_limit_auth_window_seconds)
     return RateVerdict(allowed=True)
 
 

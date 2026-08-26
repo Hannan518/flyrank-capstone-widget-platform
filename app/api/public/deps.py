@@ -2,7 +2,10 @@ from typing import Annotated
 
 from fastapi import Depends, Request
 
+from app.api.deps import ClientIpDep, get_client_ip
 from app.services.geo.chain import GeoEnrichmentChain
+
+__all__ = ["ClientIpDep", "GeoChainDep", "get_client_ip", "get_geo_chain"]
 
 
 def get_geo_chain(request: Request) -> GeoEnrichmentChain:
@@ -10,10 +13,3 @@ def get_geo_chain(request: Request) -> GeoEnrichmentChain:
 
 
 GeoChainDep = Annotated[GeoEnrichmentChain, Depends(get_geo_chain)]
-
-
-def get_client_ip(request: Request) -> str:
-    return request.client.host if request.client else "0.0.0.0"
-
-
-ClientIpDep = Annotated[str, Depends(get_client_ip)]

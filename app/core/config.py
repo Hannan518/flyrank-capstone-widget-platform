@@ -26,6 +26,8 @@ class Settings(BaseSettings):
     rate_limit_ip_window_seconds: int = 60
     rate_limit_widget_max: int = 100
     rate_limit_widget_window_seconds: int = 60
+    rate_limit_auth_max: int = 5
+    rate_limit_auth_window_seconds: int = 60
     rate_limit_retention_seconds: int = 7_200
 
     geo_provider_mode: str = "live"
@@ -42,8 +44,11 @@ class Settings(BaseSettings):
             raise ValueError("JWT_SECRET must be at least 32 characters")
         if self.geo_provider_mode not in ("live", "mock"):
             raise ValueError("GEO_PROVIDER_MODE must be 'live' or 'mock'")
-        if self.email_mode not in ("console", "smtp"):
-            raise ValueError("EMAIL_MODE must be 'console' or 'smtp'")
+        if self.email_mode != "console":
+            raise ValueError(
+                "EMAIL_MODE must be 'console' — SMTP delivery is future work; "
+                "the console mailer already proves the outbox pattern"
+            )
         return self
 
 
